@@ -113,9 +113,42 @@ namespace SmartMeal
             MainContent.Content = view;
         }
 
+        // Loads a .env file (KEY=VALUE lines) and injects any unset values into the
+        // process environment so the rest of LoadSupabaseConfigAsync picks them up.
+        private static void LoadDotEnv()
+        {
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var solutionRoot = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", ".."));
+            var candidates = new[]
+            {
+                Path.Combine(solutionRoot, ".env"),
+                Path.Combine(Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..")), ".env"),
+                Path.Combine(baseDir, ".env"),
+            };
+
+            foreach (var path in candidates.Where(File.Exists))
+            {
+                foreach (var line in File.ReadAllLines(path))
+                {
+                    var trimmed = line.Trim();
+                    if (trimmed.Length == 0 || trimmed.StartsWith('#')) continue;
+                    var eq = trimmed.IndexOf('=');
+                    if (eq <= 0) continue;
+                    var key = trimmed[..eq].Trim();
+                    var val = trimmed[(eq + 1)..].Trim();
+                    if (!string.IsNullOrEmpty(key) &&
+                        string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
+                        Environment.SetEnvironmentVariable(key, val);
+                }
+                break; // first file found wins
+            }
+        }
+
         private async Task<SupabaseConfig> LoadSupabaseConfigAsync()
         {
-            // Safe option 1: environment variables.
+            LoadDotEnv();
+
+            // Safe option 1: environment variables (includes values loaded from .env above).
             var envUrl = Environment.GetEnvironmentVariable(UrlEnvVar);
             var envKey = Environment.GetEnvironmentVariable(KeyEnvVar);
             var envRedirect = Environment.GetEnvironmentVariable(RedirectEnvVar);
