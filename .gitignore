@@ -4,6 +4,7 @@ obj/
 *.user
 supabase.config.json
 supabase.config.local.json
+.env
 *.suo
 *.cache
 *.lscache

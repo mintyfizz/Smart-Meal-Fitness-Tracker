@@ -1,0 +1,31 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, feature/supabase-ui-sync ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    env:
+      SMARTMEAL_SUPABASE_URL:        ${{ secrets.SMARTMEAL_SUPABASE_URL }}
+      SMARTMEAL_SUPABASE_ANON_KEY:   ${{ secrets.SMARTMEAL_SUPABASE_ANON_KEY }}
+      SMARTMEAL_USDA_API_KEY:        ${{ secrets.SMARTMEAL_USDA_API_KEY }}
+      SMARTMEAL_GEMINI_API_KEY:      ${{ secrets.SMARTMEAL_GEMINI_API_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore SmartMealSolution.sln
+
+      - name: Build
+        run: dotnet build SmartMealSolution.sln --no-restore --configuration Release
