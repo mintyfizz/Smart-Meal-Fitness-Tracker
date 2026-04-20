@@ -1,5 +1,7 @@
 # Smart Meal & Fitness Tracker
 
+![Build](https://github.com/mintyfizz/Smart-Meal-Fitness-Tracker/actions/workflows/build.yml/badge.svg)
+
 A Windows desktop application built with **WPF (.NET 8)** and **Supabase** that helps users track their meals, physical activities, weight, and daily calorie goals — with an AI-powered meal recommendation engine powered by Google Gemini.
 
 ---
